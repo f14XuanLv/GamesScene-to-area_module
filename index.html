@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>像素风格小游戏合集</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="pictures.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- 游戏区域A - 几何跳跃 -->
+        <div class="game-area pixel-border" id="game-area-a">
+            <div class="pixel-background"></div>
+            <div class="game-title">几何跳跃</div>
+            <div class="game-container" id="geometry-jumper">
+                <div class="game-score">分数: <span id="geometry-score">0</span></div>
+                <div class="game-canvas-container">
+                    <canvas id="geometry-canvas"></canvas>
+                </div>
+                <div class="game-controls">
+                    <button id="geometry-start">开始游戏</button>
+                    <button id="geometry-restart" style="visibility: hidden; display: inline-block;">重新开始</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 分隔区域D-1 (垂直) -->
+        <div class="separator-v"></div>
+        
+        <!-- 游戏区域C - 颜色识别 -->
+        <div class="game-area pixel-border" id="game-area-c">
+            <div class="pixel-background"></div>
+            <div class="game-title">颜色识别</div>
+            <div class="game-container" id="color-recognizer">
+                <div class="game-score">分数: <span id="color-score">0</span></div>
+                <div class="color-display pixel-border" id="color-display"></div>
+                <div class="color-input-container">
+                    <input type="text" id="color-input" placeholder="InputColor: #66CCFF | 66ccff | 123,67,8 | 69 7 3">
+                    <button id="color-submit">提交</button>
+                </div>
+                <div class="game-feedback" id="color-feedback"></div>
+                <div class="game-controls">
+                    <button id="color-restart">重新开始</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 分隔区域D-2 (水平) -->
+        <div class="separator-h"></div>
+        
+        <!-- 游戏区域B - 点击苹果 -->
+        <div class="game-area pixel-border" id="game-area-b">
+            <div class="pixel-background"></div>
+            <div class="game-title">点击苹果</div>
+            <div class="game-container" id="click-apple">
+                <div class="game-stats">
+                    <div class="game-score">分数: <span id="apple-score">0</span></div>
+                    <div class="game-lives">生命: <span id="apple-lives"></span></div>
+                </div>
+                <div class="game-canvas-container">
+                    <canvas id="apple-canvas"></canvas>
+                </div>
+                <div class="game-controls">
+                    <button id="apple-start">开始游戏</button>
+                    <button id="apple-restart" style="visibility: hidden; display: inline-block;">重新开始</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="GeometryJumper.js"></script>
+    <script src="ClickApple.js"></script>
+    <script src="ColorRecognizer.js"></script>
+</body>
+</html>

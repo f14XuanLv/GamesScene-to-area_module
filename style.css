@@ -1,0 +1,329 @@
+/* 像素风格基础设置 */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    image-rendering: pixelated;
+}
+
+body {
+    font-family: 'Press Start 2P', monospace;
+    background-color: #f8f7e9;
+    color: #5c5655;
+    line-height: 1.6;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 13fr 1fr 6fr;
+    grid-template-rows: 9fr 1fr 9fr;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* 像素风格边框 */
+.pixel-border {
+    position: relative;
+    border: none;
+}
+
+.pixel-border::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 4px solid;
+    border-image-slice: 2;
+    border-image-width: 2;
+    border-image-outset: 0;
+    border-image-source: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAnElEQVQ4T9XUQQ6DIBRF0WsMnWlnbsXt2O34GzszhI7aGIpV+gxpTYyJTfgM8D0fPiGrtddaK+WcneRXsMZYpdzqQ3wXvIIs8UURCE4wS32AEKYgBxPADoxgBCLkYAQiECEHIxCBCDnIgff08F8fuRKZwP12K5eBh925L9bkzEFt565Z45YogXN04lG0wClK4BR8GyUw7Uw99w5cAS8sViSaBj45AAAAAElFTkSuQmCC");
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+
+/* 游戏区域样式 */
+.game-area {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 游戏区域A - 几何跳跃 */
+#game-area-a {
+    grid-column: 1;
+    grid-row: 1;
+    background-color: #e6f7ff;
+}
+
+/* 游戏区域B - 点击苹果 */
+#game-area-b {
+    grid-column: 1;
+    grid-row: 3;
+    background-color: #fff2e6;
+}
+
+/* 游戏区域C - 颜色识别 */
+#game-area-c {
+    grid-column: 3;
+    grid-row: 1 / span 3;
+    background-color: #e6fff2;
+}
+
+/* 分隔区域 */
+.separator-v {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    background-color: #e0e0d1;
+    image-rendering: pixelated;
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEklEQVQIW2NgYGD4z4AE/gMADwMB7n4RbAAAAABJRU5ErkJggg==");
+    background-repeat: repeat;
+}
+
+.separator-h {
+    grid-column: 1;
+    grid-row: 2;
+    background-color: #e0e0d1;
+    image-rendering: pixelated;
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEklEQVQIW2NgYGD4z4AE/gMADwMB7n4RbAAAAABJRU5ErkJggg==");
+    background-repeat: repeat;
+}
+
+/* 游戏标题 */
+.game-title {
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 16px;
+    color: #5c5655;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+    letter-spacing: 1px;
+    image-rendering: pixelated;
+}
+
+/* 游戏容器 */
+.game-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* 游戏分数和统计信息 */
+.game-score, .game-stats {
+    font-size: 12px;
+    margin-bottom: 8px;
+    padding: 6px;
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 2px solid #5c5655;
+    display: inline-block;
+}
+
+.game-stats {
+    display: flex;
+    justify-content: space-between;
+}
+
+.game-lives {
+    margin-left: 16px;
+}
+
+/* 像素风格按钮 */
+button {
+    background-color: #ffecd9;
+    color: #5c5655;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    margin: 8px 0;
+    outline: none;
+    position: relative;
+    box-shadow: 
+        0 4px 0 0 #b38f72,
+        0 6px 0 0 #826655;
+    image-rendering: pixelated;
+}
+
+button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 2px solid #826655;
+    image-rendering: pixelated;
+}
+
+button:hover {
+    background-color: #ffe0b3;
+}
+
+button:active {
+    transform: translateY(4px);
+    box-shadow: 
+        0 0 0 0 #b38f72,
+        0 2px 0 0 #826655;
+}
+
+/* 游戏控制区域 */
+.game-controls {
+    margin-top: 16px;
+    text-align: center;
+}
+
+/* Canvas 容器 */
+.game-canvas-container {
+    flex: 1;
+    position: relative;
+    background-color: rgba(255, 255, 255, 0.5);
+    overflow: hidden;
+}
+
+.game-canvas-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 4px solid #5c5655;
+    pointer-events: none;
+    image-rendering: pixelated;
+}
+
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+}
+
+/* 颜色识别游戏特定样式 */
+.color-display {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 16px auto;
+    background-color: #ffffff;
+    image-rendering: pixelated;
+}
+
+.color-display::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 4px solid #5c5655;
+    pointer-events: none;
+    image-rendering: pixelated;
+}
+
+.color-input-container {
+    display: flex;
+    margin-bottom: 16px;
+}
+
+#color-input {
+    flex: 1;
+    padding: 8px;
+    font-family: 'Press Start 2P', monospace;
+    background-color: #ffffff;
+    color: #5c5655;
+    border: 2px solid #5c5655;
+    font-size: 10px;
+}
+
+.game-feedback {
+    font-size: 12px;
+    margin: 16px 0;
+    height: 20px;
+    text-align: center;
+}
+
+/* 像素风格元素 */
+.pixel-heart {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 4px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+}
+
+/* 像素点阵效果 */
+.pixel-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEklEQVQIW2NgYGD4z4AE/gMADwMB7n4RbAAAAABJRU5ErkJggg==");
+    background-repeat: repeat;
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* 放大效果动画 */
+@keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.pop {
+    animation: pop 0.3s ease;
+}
+
+/* 响应式调整 */
+@media (max-width: 1200px) {
+    .container {
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(3, 1fr);
+        height: auto;
+        overflow: auto;
+    }
+    
+    #game-area-a, #game-area-b, #game-area-c {
+        grid-column: 1;
+    }
+    
+    #game-area-a {
+        grid-row: 1;
+    }
+    
+    #game-area-b {
+        grid-row: 3;
+    }
+    
+    #game-area-c {
+        grid-row: 5;
+    }
+    
+    .separator-v, .separator-h {
+        display: none;
+    }
+    
+    body {
+        height: auto;
+        overflow: auto;
+    }
+    
+    .color-display {
+        width: 150px;
+        height: 150px;
+    }
+}
