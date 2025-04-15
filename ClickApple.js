@@ -28,7 +28,7 @@ const clickApple = {
     itemWeights: [0.6, 0.1, 0.3],
     itemPoints: {
         apple: 1,
-        goldenApple: 6,
+        goldenApple: 10,
         tnt: 0  // TNT不加分，只减生命
     },
     
