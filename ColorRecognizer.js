@@ -5,7 +5,7 @@ const colorRecognizer = {
     isRunning: false,
     
     // 游戏参数
-    roundsPerGame: 10,  // 每局游戏的回合数
+    roundsPerGame: 10000,  // 每局游戏的回合数
     
     // 游戏元素
     colorDisplay: null,
