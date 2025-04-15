@@ -9,7 +9,8 @@ const COLORS = {
     GRID: '#d6eeff',           // 网格效果颜色
     TEXT: '#FFFFFF',           // 文字颜色
     BORDER: '#FFFFFF',         // 边框颜色
-    GAME_OVER: 'rgba(0, 0, 0, 0.7)' // 游戏结束蒙层
+    GAME_OVER: 'rgba(0, 0, 0, 0.7)', // 游戏结束蒙层
+    DEBUG_BOX: '#ff0000'       // 调试框颜色
 };
 
 // 游戏状态
@@ -28,6 +29,17 @@ const geometryJumper = {
     jumpStartTime: 0,          // 起跳时间点
     lastJumpDuration: 0,       // 上次跳跃持续时间
     isRecordingJump: false,    // 是否正在记录跳跃
+    
+    // 新增调试参数 - 几何身位测量
+    debugGeometryUnit: false,   // 控制几何身位测量的开关
+    geometryUnitSize: 0,        // 几何身位大小（像素）
+    virtualBoxActive: false,    // 是否已生成虚拟碰撞框
+    virtualBoxTriggered: false, // 玩家是否已触发虚拟碰撞框
+    virtualBoxStartTime: 0,     // 玩家触发虚拟碰撞框的时间
+    virtualBoxEndTime: 0,       // 玩家碰到障碍物的时间
+    unitTravelTime: 0,          // 移动一个几何身位所需时间（毫秒）
+    measurementComplete: false, // 测量是否完成
+    firstObstacleId: null,      // 第一个障碍物的ID
     
     // 游戏参数
     gravity: 0.5,                // 降低重力使滞空时间更长
@@ -123,6 +135,15 @@ function resetGeometryJumper() {
     geometryJumper.lastJumpDuration = 0;
     geometryJumper.isRecordingJump = false;
     
+    // 重置几何身位测量相关变量
+    geometryJumper.virtualBoxActive = false;
+    geometryJumper.virtualBoxTriggered = false;
+    geometryJumper.virtualBoxStartTime = 0;
+    geometryJumper.virtualBoxEndTime = 0;
+    geometryJumper.unitTravelTime = 0;
+    geometryJumper.measurementComplete = false;
+    geometryJumper.firstObstacleId = null;
+    
     // 更新分数显示
     document.getElementById('geometry-score').textContent = geometryJumper.score;
 }
@@ -138,6 +159,13 @@ function startGeometryJumper() {
     document.getElementById('geometry-restart').style.display = 'inline-block';
     
     resetGeometryJumper();
+    
+    // 设置几何身位大小
+    if (geometryJumper.debugGeometryUnit) {
+        geometryJumper.geometryUnitSize = geometryJumper.player.width;
+        console.log("几何身位像素大小:", geometryJumper.geometryUnitSize);
+    }
+    
     geometryJumper.isRunning = true;
     geometryJumper.lastFrameTime = performance.now();
     gameLoopGeometryJumper(geometryJumper.lastFrameTime);
@@ -150,6 +178,13 @@ function restartGeometryJumper() {
     document.getElementById('geometry-restart').style.display = 'inline-block';
     
     resetGeometryJumper();
+    
+    // 重新设置几何身位大小
+    if (geometryJumper.debugGeometryUnit) {
+        geometryJumper.geometryUnitSize = geometryJumper.player.width;
+        console.log("几何身位像素大小:", geometryJumper.geometryUnitSize);
+    }
+    
     geometryJumper.isRunning = true;
     geometryJumper.lastFrameTime = performance.now();
     gameLoopGeometryJumper(geometryJumper.lastFrameTime);
@@ -298,24 +333,69 @@ function updateGeometryJumper(deltaTime, timeScale) {
                 for (let i = 0; i < obstacleCount; i++) {
                     const height = baseHeight + getRandomInt(-10, 10);
                     const obstacle = {
+                        id: Date.now() + i, // 为障碍物添加唯一ID
                         x: geometryJumper.width + (i * getRandomInt(30, 50)),
                         y: geometryJumper.height - geometryJumper.groundHeight - height,
                         width: getRandomInt(15, 30),
                         height: height,
-                        color: COLORS.OBSTACLE
+                        color: COLORS.OBSTACLE,
+                        
+                        // 新增：针对第一个障碍物添加虚拟碰撞框
+                        hasVirtualBox: false,
+                        virtualBoxX: 0,
+                        virtualBoxWidth: 0
                     };
+                    
+                    // 如果开启了几何身位测量且这是第一个障碍物且虚拟碰撞框尚未激活
+                    if (geometryJumper.debugGeometryUnit && 
+                        geometryJumper.obstacles.length === 0 && 
+                        !geometryJumper.virtualBoxActive && 
+                        i === 0) {
+                        
+                        obstacle.hasVirtualBox = true;
+                        // 虚拟碰撞框宽度为10个几何身位
+                        obstacle.virtualBoxWidth = geometryJumper.geometryUnitSize * 10;
+                        // 虚拟碰撞框位置在障碍物左侧
+                        obstacle.virtualBoxX = obstacle.x - obstacle.virtualBoxWidth;
+                        
+                        geometryJumper.virtualBoxActive = true;
+                        geometryJumper.firstObstacleId = obstacle.id;
+                    }
+                    
                     geometryJumper.obstacles.push(obstacle);
                 }
             } else {
                 // 单个障碍物
                 const height = getRandomInt(20, 50);
                 const obstacle = {
+                    id: Date.now(), // 为障碍物添加唯一ID
                     x: geometryJumper.width,
                     y: geometryJumper.height - geometryJumper.groundHeight - height,
                     width: getRandomInt(20, 40),
                     height: height,
-                    color: COLORS.OBSTACLE
+                    color: COLORS.OBSTACLE,
+                    
+                    // 新增：针对第一个障碍物添加虚拟碰撞框
+                    hasVirtualBox: false,
+                    virtualBoxX: 0,
+                    virtualBoxWidth: 0
                 };
+                
+                // 如果开启了几何身位测量且这是第一个障碍物且虚拟碰撞框尚未激活
+                if (geometryJumper.debugGeometryUnit && 
+                    geometryJumper.obstacles.length === 0 && 
+                    !geometryJumper.virtualBoxActive) {
+                    
+                    obstacle.hasVirtualBox = true;
+                    // 虚拟碰撞框宽度为10个几何身位
+                    obstacle.virtualBoxWidth = geometryJumper.geometryUnitSize * 10;
+                    // 虚拟碰撞框位置在障碍物左侧
+                    obstacle.virtualBoxX = obstacle.x - obstacle.virtualBoxWidth;
+                    
+                    geometryJumper.virtualBoxActive = true;
+                    geometryJumper.firstObstacleId = obstacle.id;
+                }
+                
                 geometryJumper.obstacles.push(obstacle);
             }
             
@@ -326,15 +406,52 @@ function updateGeometryJumper(deltaTime, timeScale) {
     
     // 更新障碍物位置 - 使用时间因子调整移动速度
     for (let i = 0; i < geometryJumper.obstacles.length; i++) {
-        geometryJumper.obstacles[i].x -= scaledGameSpeed;
+        const obstacle = geometryJumper.obstacles[i];
+        obstacle.x -= scaledGameSpeed;
         
-        // 检查碰撞
-        if (isColliding(geometryJumper.player, geometryJumper.obstacles[i])) {
+        // 如果有虚拟碰撞框，同时更新虚拟碰撞框位置
+        if (obstacle.hasVirtualBox) {
+            obstacle.virtualBoxX -= scaledGameSpeed;
+            
+            // 检查玩家是否碰到虚拟碰撞框（只有第一次触发有效）
+            if (geometryJumper.debugGeometryUnit && 
+                !geometryJumper.virtualBoxTriggered && 
+                !geometryJumper.measurementComplete) {
+                
+                const virtualBoxRight = obstacle.virtualBoxX + obstacle.virtualBoxWidth;
+                
+                // 检查玩家右侧是否越过虚拟碰撞框的左边界
+                if (geometryJumper.player.x + geometryJumper.player.width >= obstacle.virtualBoxX &&
+                    geometryJumper.player.x <= virtualBoxRight) {
+                    
+                    geometryJumper.virtualBoxStartTime = performance.now();
+                    geometryJumper.virtualBoxTriggered = true;
+                }
+            }
+        }
+        
+        // 检查与障碍物的碰撞
+        if (isColliding(geometryJumper.player, obstacle)) {
+            // 如果是在测量几何身位且已触发虚拟碰撞框
+            if (geometryJumper.debugGeometryUnit && 
+                geometryJumper.virtualBoxTriggered && 
+                !geometryJumper.measurementComplete &&
+                obstacle.id === geometryJumper.firstObstacleId) {
+                
+                geometryJumper.virtualBoxEndTime = performance.now();
+                const timeDiff = geometryJumper.virtualBoxEndTime - geometryJumper.virtualBoxStartTime;
+                // 计算移动一个几何身位所需的时间（毫秒）
+                geometryJumper.unitTravelTime = timeDiff / 10;
+                geometryJumper.measurementComplete = true;
+                
+                console.log("几何身位测量完成:", geometryJumper.unitTravelTime, "毫秒/身位");
+            }
+            
             geometryJumper.gameOver = true;
         }
         
         // 移除超出屏幕的障碍物
-        if (geometryJumper.obstacles[i].x + geometryJumper.obstacles[i].width < 0) {
+        if (obstacle.x + obstacle.width < 0) {
             geometryJumper.obstacles.splice(i, 1);
             i--;
         }
@@ -366,6 +483,43 @@ function renderGeometryJumper() {
         }
     }
     
+    // 绘制障碍物及其虚拟碰撞框（如果有）
+    for (const obstacle of geometryJumper.obstacles) {
+        // 绘制虚拟碰撞框（如果有且调试模式开启）
+        if (geometryJumper.debugGeometryUnit && obstacle.hasVirtualBox) {
+            // 保存当前上下文状态
+            ctx.save();
+            
+            // 设置虚线样式
+            ctx.strokeStyle = COLORS.DEBUG_BOX;
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]); // 设置虚线样式
+            
+            // 绘制虚拟碰撞框
+            ctx.strokeRect(
+                obstacle.virtualBoxX,
+                obstacle.y,
+                obstacle.virtualBoxWidth,
+                obstacle.height
+            );
+            
+            // 绘制格子线（每个几何身位宽度）
+            for (let i = 1; i < 10; i++) {
+                const gridX = obstacle.virtualBoxX + i * geometryJumper.geometryUnitSize;
+                ctx.beginPath();
+                ctx.moveTo(gridX, obstacle.y);
+                ctx.lineTo(gridX, obstacle.y + obstacle.height);
+                ctx.stroke();
+            }
+            
+            // 恢复上下文状态
+            ctx.restore();
+        }
+        
+        // 绘制障碍物
+        drawPixelRect(ctx, obstacle.x, obstacle.y, obstacle.width, obstacle.height, obstacle.color, COLORS.BORDER);
+    }
+    
     // 绘制玩家
     drawPixelRect(ctx, 
                   geometryJumper.player.x, 
@@ -374,11 +528,6 @@ function renderGeometryJumper() {
                   geometryJumper.player.height, 
                   geometryJumper.player.color, 
                   COLORS.BORDER);
-    
-    // 绘制障碍物
-    for (const obstacle of geometryJumper.obstacles) {
-        drawPixelRect(ctx, obstacle.x, obstacle.y, obstacle.width, obstacle.height, obstacle.color, COLORS.BORDER);
-    }
     
     // 如果开启了调试计时器，显示上次跳跃时长
     if (geometryJumper.debugJumpTime && geometryJumper.lastJumpDuration > 0) {
@@ -390,6 +539,28 @@ function renderGeometryJumper() {
         if (geometryJumper.isRecordingJump) {
             const currentJumpTime = (performance.now() - geometryJumper.jumpStartTime) / 1000;
             ctx.fillText(`正在跳跃: ${currentJumpTime.toFixed(3)}秒`, 10, 40);
+        }
+    }
+    
+    // 如果开启了几何身位测量，显示相关信息
+    if (geometryJumper.debugGeometryUnit) {
+        ctx.font = '12px monospace';
+        ctx.fillStyle = '#FF0000';
+        
+        let yPos = geometryJumper.debugJumpTime ? 60 : 20;
+        
+        ctx.fillText(`几何身位像素大小: ${geometryJumper.geometryUnitSize.toFixed(2)}px`, 10, yPos);
+        yPos += 20;
+        
+        if (geometryJumper.virtualBoxTriggered && !geometryJumper.measurementComplete) {
+            const currentTime = (performance.now() - geometryJumper.virtualBoxStartTime) / 1000;
+            ctx.fillText(`正在测量: ${currentTime.toFixed(3)}秒`, 10, yPos);
+            yPos += 20;
+        }
+        
+        if (geometryJumper.measurementComplete) {
+            ctx.fillText(`一个几何身位所需时间: ${geometryJumper.unitTravelTime.toFixed(3)}毫秒`, 10, yPos);
+            yPos += 20;
         }
     }
     
